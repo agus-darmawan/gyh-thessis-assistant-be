@@ -6,7 +6,7 @@ Flask-Migrate==4.0.5
 psycopg2-binary==2.9.7
 python-dotenv==1.0.0
 pytz==2023.3
-Werkzeug==2.3.7
+Werkzeug==3.0.6
 gunicorn==21.2.0
 
 # For production deployment
