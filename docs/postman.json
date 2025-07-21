@@ -1,0 +1,770 @@
+{
+	"info": {
+		"name": "GyH API Collection",
+		"description": "Complete API collection for GyH (Nail Studios & Jake Images)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"version": {
+			"major": 1,
+			"minor": 0,
+			"patch": 0
+		}
+	},
+	"auth": {
+		"type": "noauth"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response contains message', function () {",
+							"    const responseJson = pm.response.json();",
+							"    pm.expect(responseJson).to.have.property('message');",
+							"    pm.expect(responseJson.message).to.include('GyH API is running');",
+							"});",
+							"",
+							"pm.test('Response contains timestamp', function () {",
+							"    const responseJson = pm.response.json();",
+							"    pm.expect(responseJson).to.have.property('timestamp');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/api/health",
+					"host": ["{{BASE_URL}}"],
+					"path": ["api", "health"]
+				},
+				"description": "Health check endpoint to verify API is running"
+			}
+		},
+		{
+			"name": "Nail Studios",
+			"item": [
+				{
+					"name": "CRUD Operations",
+					"item": [
+						{
+							"name": "Get All Nail Studios",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 200', function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test('Response has data array', function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.expect(responseJson).to.have.property('data');",
+											"    pm.expect(responseJson.data).to.be.an('array');",
+											"});",
+											"",
+											"pm.test('Response has pagination', function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.expect(responseJson).to.have.property('pagination');",
+											"    pm.expect(responseJson.pagination).to.have.property('page');",
+											"    pm.expect(responseJson.pagination).to.have.property('total');",
+											"});",
+											"",
+											"if (pm.response.json().data.length > 0) {",
+											"    pm.test('First studio has required fields', function () {",
+											"        const studio = pm.response.json().data[0];",
+											"        pm.expect(studio).to.have.property('id');",
+											"        pm.expect(studio).to.have.property('nama');",
+											"        pm.expect(studio).to.have.property('isOpenToday');",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios?page=1&per_page=20",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "per_page",
+											"value": "20"
+										}
+									]
+								},
+								"description": "Get all nail studios with pagination"
+							}
+						},
+						{
+							"name": "Get Nail Studio by ID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    pm.test('Response has studio data', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson).to.have.property('data');",
+											"        pm.expect(responseJson.data).to.have.property('id');",
+											"        pm.expect(responseJson.data).to.have.property('nama');",
+											"    });",
+											"} else if (pm.response.code === 404) {",
+											"    pm.test('Not found response', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.false;",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios/{{STUDIO_ID}}",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios", "{{STUDIO_ID}}"]
+								},
+								"description": "Get specific nail studio details"
+							}
+						},
+						{
+							"name": "Create Nail Studio",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    pm.test('Studio created successfully', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.true;",
+											"        pm.expect(responseJson).to.have.property('data');",
+											"        pm.environment.set('CREATED_STUDIO_ID', responseJson.data.id);",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nama\": \"Test Nail Studio\",\n  \"alamat\": \"Jl. Test No. 123\",\n  \"desa\": \"Wonokromo\",\n  \"noTelp\": \"081234567890\",\n  \"instagram\": \"@testnailstudio\",\n  \"whatsapp\": \"081234567890\",\n  \"rating\": 4.5,\n  \"totalReviews\": 25,\n  \"description\": \"Test nail studio for API testing\",\n  \"latitude\": -7.2575,\n  \"longitude\": 112.7521,\n  \"operatingHours\": {\n    \"monday\": {\"isOpen\": true, \"openTime\": \"09:00\", \"closeTime\": \"21:00\"},\n    \"tuesday\": {\"isOpen\": true, \"openTime\": \"09:00\", \"closeTime\": \"21:00\"},\n    \"wednesday\": {\"isOpen\": true, \"openTime\": \"09:00\", \"closeTime\": \"21:00\"},\n    \"thursday\": {\"isOpen\": true, \"openTime\": \"09:00\", \"closeTime\": \"21:00\"},\n    \"friday\": {\"isOpen\": true, \"openTime\": \"09:00\", \"closeTime\": \"21:00\"},\n    \"saturday\": {\"isOpen\": true, \"openTime\": \"10:00\", \"closeTime\": \"22:00\"},\n    \"sunday\": {\"isOpen\": false}\n  },\n  \"surveyStatus\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"]
+								},
+								"description": "Create new nail studio"
+							}
+						},
+						{
+							"name": "Update Nail Studio",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nama\": \"Updated Test Studio\",\n  \"rating\": 4.8,\n  \"totalReviews\": 35,\n  \"description\": \"Updated description\",\n  \"surveyStatus\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios/{{STUDIO_ID}}",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios", "{{STUDIO_ID}}"]
+								},
+								"description": "Update existing nail studio"
+							}
+						},
+						{
+							"name": "Update Survey Status",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"surveyStatus\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios/{{STUDIO_ID}}/survey-status",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios", "{{STUDIO_ID}}", "survey-status"]
+								},
+								"description": "Update only survey status"
+							}
+						},
+						{
+							"name": "Delete Nail Studio",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    pm.test('Studio deleted successfully', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.true;",
+											"        pm.expect(responseJson.message).to.include('deleted');",
+											"    });",
+											"} else if (pm.response.code === 404) {",
+											"    pm.test('Studio not found', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.false;",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios/{{STUDIO_ID}}",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios", "{{STUDIO_ID}}"]
+								},
+								"description": "Delete nail studio by ID"
+							}
+						}
+					]
+				},
+				{
+					"name": "Search & Filter",
+					"item": [
+						{
+							"name": "Search Studios",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios?search=nail&page=1&per_page=10",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"],
+									"query": [
+										{
+											"key": "search",
+											"value": "nail",
+											"description": "Search term for nama, alamat, desa, description"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "per_page",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Search nail studios by text"
+							}
+						},
+						{
+							"name": "Filter by Desa",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios?desa=Wonokromo",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"],
+									"query": [
+										{
+											"key": "desa",
+											"value": "Wonokromo",
+											"description": "Filter by desa name"
+										}
+									]
+								},
+								"description": "Filter studios by desa"
+							}
+						},
+						{
+							"name": "Filter by Rating",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios?rating_min=4.0&sort_by=rating&sort_order=desc",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"],
+									"query": [
+										{
+											"key": "rating_min",
+											"value": "4.0",
+											"description": "Minimum rating filter"
+										},
+										{
+											"key": "sort_by",
+											"value": "rating",
+											"description": "Sort by rating"
+										},
+										{
+											"key": "sort_order",
+											"value": "desc",
+											"description": "Descending order"
+										}
+									]
+								},
+								"description": "Filter by minimum rating and sort"
+							}
+						},
+						{
+							"name": "Filter Open Today",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios?open_today=true",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"],
+									"query": [
+										{
+											"key": "open_today",
+											"value": "true",
+											"description": "Filter studios open today"
+										}
+									]
+								},
+								"description": "Filter studios that are open today"
+							}
+						},
+						{
+							"name": "Filter by Survey Status",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios?survey_status=true",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"],
+									"query": [
+										{
+											"key": "survey_status",
+											"value": "true",
+											"description": "Filter by survey completion status"
+										}
+									]
+								},
+								"description": "Filter by survey status"
+							}
+						},
+						{
+							"name": "Advanced Filter Combination",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios?search=beauty&desa=Gubeng&rating_min=4.0&survey_status=true&sort_by=rating&sort_order=desc&page=1&per_page=5",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios"],
+									"query": [
+										{
+											"key": "search",
+											"value": "beauty"
+										},
+										{
+											"key": "desa",
+											"value": "Gubeng"
+										},
+										{
+											"key": "rating_min",
+											"value": "4.0"
+										},
+										{
+											"key": "survey_status",
+											"value": "true"
+										},
+										{
+											"key": "sort_by",
+											"value": "rating"
+										},
+										{
+											"key": "sort_order",
+											"value": "desc"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "per_page",
+											"value": "5"
+										}
+									]
+								},
+								"description": "Complex filter with multiple parameters"
+							}
+						}
+					]
+				},
+				{
+					"name": "Statistics & Analytics",
+					"item": [
+						{
+							"name": "Get Statistics",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 200', function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test('Response has stats object', function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.expect(responseJson).to.have.property('stats');",
+											"    pm.expect(responseJson.stats).to.have.property('total_studios');",
+											"    pm.expect(responseJson.stats).to.have.property('surveyed_studios');",
+											"    pm.expect(responseJson.stats).to.have.property('average_rating');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/nail-studios/stats",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "nail-studios", "stats"]
+								},
+								"description": "Get comprehensive statistics about nail studios"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Jake Images",
+			"item": [
+				{
+					"name": "Image Management",
+					"item": [
+						{
+							"name": "Get Random Jake Image",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    pm.test('Random image response', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson).to.have.property('image_path');",
+											"        pm.expect(responseJson).to.have.property('image_number');",
+											"        pm.environment.set('RANDOM_IMAGE_NUMBER', responseJson.image_number);",
+											"    });",
+											"} else if (pm.response.code === 404) {",
+											"    pm.test('No images found', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.false;",
+											"        pm.expect(responseJson.message).to.include('No Jake images');",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/random-jake",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "random-jake"]
+								},
+								"description": "Get a random Jake image"
+							}
+						},
+						{
+							"name": "Upload Jake Image",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    pm.test('Image uploaded successfully', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.true;",
+											"        pm.expect(responseJson).to.have.property('image_number');",
+											"        pm.environment.set('UPLOADED_IMAGE_NUMBER', responseJson.image_number);",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"description": "Jake image file (jpg, jpeg, png)",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "number",
+											"value": "",
+											"description": "Optional custom number for the image",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/upload-jake",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "upload-jake"]
+								},
+								"description": "Upload a single Jake image"
+							}
+						},
+						{
+							"name": "Upload Multiple Jake Images",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "files",
+											"description": "Multiple Jake image files",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/upload-multiple",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "upload-multiple"]
+								},
+								"description": "Upload multiple Jake images at once"
+							}
+						},
+						{
+							"name": "Delete Jake Image",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    pm.test('Image deleted successfully', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.true;",
+											"        pm.expect(responseJson.message).to.include('deleted');",
+											"    });",
+											"} else if (pm.response.code === 404) {",
+											"    pm.test('Image not found', function () {",
+											"        const responseJson = pm.response.json();",
+											"        pm.expect(responseJson.success).to.be.false;",
+											"    });",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/delete-jake/{{IMAGE_NUMBER}}",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "delete-jake", "{{IMAGE_NUMBER}}"]
+								},
+								"description": "Delete Jake image by number"
+							}
+						},
+						{
+							"name": "Get Jake Image File",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/images/{{IMAGE_FILENAME}}",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "images", "{{IMAGE_FILENAME}}"]
+								},
+								"description": "Get actual image file"
+							}
+						}
+					]
+				},
+				{
+					"name": "Image Statistics",
+					"item": [
+						{
+							"name": "Get Jake Stats",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 200', function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test('Response has stats', function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.expect(responseJson).to.have.property('total_images');",
+											"    pm.expect(responseJson).to.have.property('available_numbers');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/api/jake-stats",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "jake-stats"]
+								},
+								"description": "Get Jake images statistics"
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set common variables if not already set",
+					"if (!pm.environment.get('BASE_URL')) {",
+					"    pm.environment.set('BASE_URL', 'http://localhost:6002');",
+					"}",
+					"",
+					"if (!pm.environment.get('STUDIO_ID')) {",
+					"    pm.environment.set('STUDIO_ID', 'ns_20250721120000_abcd1234');",
+					"}",
+					"",
+					"if (!pm.environment.get('IMAGE_NUMBER')) {",
+					"    pm.environment.set('IMAGE_NUMBER', '1');",
+					"}",
+					"",
+					"if (!pm.environment.get('IMAGE_FILENAME')) {",
+					"    pm.environment.set('IMAGE_FILENAME', '1.jpg');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test for response format",
+					"pm.test('Response is JSON', function () {",
+					"    pm.response.to.be.json;",
+					"});",
+					"",
+					"// Log response for debugging",
+					"if (pm.response.code >= 400) {",
+					"    console.log('Error Response:', pm.response.json());",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:6002",
+			"type": "string"
+		},
+		{
+			"key": "STUDIO_ID",
+			"value": "ns_20250721120000_abcd1234",
+			"type": "string"
+		},
+		{
+			"key": "IMAGE_NUMBER",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "IMAGE_FILENAME",
+			"value": "1.jpg",
+			"type": "string"
+		}
+	]
+  }

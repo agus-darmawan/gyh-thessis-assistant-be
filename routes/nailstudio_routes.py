@@ -21,7 +21,6 @@ def get_nail_studios():
         open_today = request.args.get('open_today', '').strip()
         
         query = NailStudio.query
-        
         filters = []
         
         if search:
@@ -46,26 +45,13 @@ def get_nail_studios():
             query = query.filter(and_(*filters))
         
         if sort_by == 'rating':
-            if sort_order == 'desc':
-                query = query.order_by(desc(NailStudio.rating))
-            else:
-                query = query.order_by(asc(NailStudio.rating))
+            query = query.order_by(desc(NailStudio.rating) if sort_order == 'desc' else asc(NailStudio.rating))
         elif sort_by == 'created_at':
-            if sort_order == 'desc':
-                query = query.order_by(desc(NailStudio.createdAt))
-            else:
-                query = query.order_by(asc(NailStudio.createdAt))
+            query = query.order_by(desc(NailStudio.createdAt) if sort_order == 'desc' else asc(NailStudio.createdAt))
         else:  
-            if sort_order == 'desc':
-                query = query.order_by(desc(NailStudio.nama))
-            else:
-                query = query.order_by(asc(NailStudio.nama))
+            query = query.order_by(desc(NailStudio.nama) if sort_order == 'desc' else asc(NailStudio.nama))
         
-        paginated = query.paginate(
-            page=page, 
-            per_page=per_page, 
-            error_out=False
-        )
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
         
         studios = []
         for studio in paginated.items:
@@ -159,17 +145,16 @@ def create_nail_studio():
             noTelp=data.get('noTelp'),
             instagram=data.get('instagram'),
             whatsapp=data.get('whatsapp'),
-            rating=data.get('rating', 0.0),
-            totalReviews=data.get('totalReviews', 0),
+            rating=float(data.get('rating', 0.0)),
+            totalReviews=int(data.get('totalReviews', 0)),
             description=data.get('description'),
-            services=data.get('services', []),
             photoUrl=data.get('photoUrl'),
             instagramEmbed=data.get('instagramEmbed'),
             mapsEmbed=data.get('mapsEmbed'),
-            latitude=data.get('latitude'),
-            longitude=data.get('longitude'),
+            latitude=float(data.get('latitude')) if data.get('latitude') is not None else None,
+            longitude=float(data.get('longitude')) if data.get('longitude') is not None else None,
             operatingHours=data.get('operatingHours', {}),
-            surveyStatus=data.get('surveyStatus', False)
+            surveyStatus=bool(data.get('surveyStatus', False))
         )
         
         db.session.add(studio)
@@ -181,6 +166,12 @@ def create_nail_studio():
             'message': f'Nail studio {studio.nama} created successfully'
         }), 201
         
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Invalid data format: {str(ve)}'
+        }), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({
@@ -214,13 +205,11 @@ def update_nail_studio(studio_id):
         if 'whatsapp' in data:
             studio.whatsapp = data['whatsapp']
         if 'rating' in data:
-            studio.rating = data['rating']
+            studio.rating = float(data['rating'])
         if 'totalReviews' in data:
-            studio.totalReviews = data['totalReviews']
+            studio.totalReviews = int(data['totalReviews'])
         if 'description' in data:
             studio.description = data['description']
-        if 'services' in data:
-            studio.services = data['services']
         if 'photoUrl' in data:
             studio.photoUrl = data['photoUrl']
         if 'instagramEmbed' in data:
@@ -228,13 +217,13 @@ def update_nail_studio(studio_id):
         if 'mapsEmbed' in data:
             studio.mapsEmbed = data['mapsEmbed']
         if 'latitude' in data:
-            studio.latitude = data['latitude']
+            studio.latitude = float(data['latitude']) if data['latitude'] is not None else None
         if 'longitude' in data:
-            studio.longitude = data['longitude']
+            studio.longitude = float(data['longitude']) if data['longitude'] is not None else None
         if 'operatingHours' in data:
             studio.operatingHours = data['operatingHours']
         if 'surveyStatus' in data:
-            studio.surveyStatus = data['surveyStatus']
+            studio.surveyStatus = bool(data['surveyStatus'])
         
         studio.updatedAt = datetime.utcnow()
         
@@ -246,6 +235,12 @@ def update_nail_studio(studio_id):
             'message': f'Nail studio {studio.nama} updated successfully'
         })
         
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Invalid data format: {str(ve)}'
+        }), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({

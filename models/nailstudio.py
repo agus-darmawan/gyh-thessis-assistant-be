@@ -1,12 +1,12 @@
 from extensions import db
-from datetime import datetime, time
-from sqlalchemy.dialects.postgresql import ARRAY
+from datetime import datetime
 import pytz
+import uuid
 
 class NailStudio(db.Model):
     __tablename__ = 'nail_studios'
     
-    id = db.Column(db.String(50), primary_key=True, default=lambda: f"ns_{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    id = db.Column(db.String(50), primary_key=True, default=lambda: f"ns_{datetime.now().strftime('%Y%m%d%H%M%S')}_{str(uuid.uuid4())[:8]}")
     nama = db.Column(db.String(255), nullable=False, index=True)
     alamat = db.Column(db.Text)
     desa = db.Column(db.String(100), index=True) 
@@ -27,7 +27,7 @@ class NailStudio(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     
-    operatingHours = db.Column(db.JSON, default={})
+    operatingHours = db.Column(db.JSON, default=dict)
     
     surveyStatus = db.Column(db.Boolean, default=False, index=True)
     
@@ -38,7 +38,7 @@ class NailStudio(db.Model):
         return f'<NailStudio {self.nama}>'
     
     def to_dict(self, include_today_status=True):
-        """Convert model to dictionary with optional today's opening status"""
+        """Convert model to dictionary"""
         data = {
             'id': self.id,
             'nama': self.nama,
@@ -47,14 +47,14 @@ class NailStudio(db.Model):
             'noTelp': self.noTelp,
             'instagram': self.instagram,
             'whatsapp': self.whatsapp,
-            'rating': self.rating,
-            'totalReviews': self.totalReviews,
+            'rating': float(self.rating) if self.rating else 0.0,
+            'totalReviews': self.totalReviews or 0,
             'description': self.description,
             'photoUrl': self.photoUrl,
             'instagramEmbed': self.instagramEmbed,
             'mapsEmbed': self.mapsEmbed,
-            'latitude': self.latitude,
-            'longitude': self.longitude,
+            'latitude': float(self.latitude) if self.latitude else None,
+            'longitude': float(self.longitude) if self.longitude else None,
             'operatingHours': self.operatingHours or {},
             'surveyStatus': self.surveyStatus,
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
@@ -98,7 +98,7 @@ class NailStudio(db.Model):
         return {'isOpen': False}
     
     def get_week_schedule(self):
-        """Get full week schedule in readable format"""
+        """Get full week schedule"""
         days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
         day_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
         
