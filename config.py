@@ -19,12 +19,3 @@ class Config:
         'pool_pre_ping': True,
         'pool_recycle': 300,
     }
-    
-    JAKE_IMAGES_FOLDER = os.environ.get('JAKE_IMAGES_FOLDER', 'jake_images')
-    MAX_IMAGE_NUMBER = int(os.environ.get('MAX_IMAGE_NUMBER', '255'))
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    
-    ITEMS_PER_PAGE = int(os.environ.get('ITEMS_PER_PAGE', '20'))
-    MAX_SEARCH_RESULTS = int(os.environ.get('MAX_SEARCH_RESULTS', '100'))
-    
-    TIMEZONE = 'Asia/Jakarta'

@@ -19,7 +19,6 @@ class NailStudio(db.Model):
     totalReviews = db.Column(db.Integer, default=0)
     
     description = db.Column(db.Text)
-    services = db.Column(ARRAY(db.String), default=[])
     photoUrl = db.Column(db.Text)
     
     instagramEmbed = db.Column(db.Text)
@@ -51,7 +50,6 @@ class NailStudio(db.Model):
             'rating': self.rating,
             'totalReviews': self.totalReviews,
             'description': self.description,
-            'services': self.services or [],
             'photoUrl': self.photoUrl,
             'instagramEmbed': self.instagramEmbed,
             'mapsEmbed': self.mapsEmbed,

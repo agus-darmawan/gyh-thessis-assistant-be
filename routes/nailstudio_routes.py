@@ -16,8 +16,8 @@ def get_nail_studios():
         desa = request.args.get('desa', '').strip()
         survey_status = request.args.get('survey_status', '').strip()
         rating_min = request.args.get('rating_min', 0, type=float)
-        sort_by = request.args.get('sort_by', 'nama')  # nama, rating, created_at
-        sort_order = request.args.get('sort_order', 'asc')  # asc, desc
+        sort_by = request.args.get('sort_by', 'nama') 
+        sort_order = request.args.get('sort_order', 'asc') 
         open_today = request.args.get('open_today', '').strip()
         
         query = NailStudio.query
