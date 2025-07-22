@@ -1,10 +1,12 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify,send_from_directory
 from sqlalchemy import and_, or_, func, desc, asc
 from models.nailstudio import NailStudio
 from extensions import db
 from datetime import datetime
 
 nailstudio_bp = Blueprint('nailstudio', __name__)
+
+IMAGES_FOLDER = "nails_images"
 
 @nailstudio_bp.route('/nail-studios', methods=['GET'])
 def get_nail_studios():
@@ -358,3 +360,7 @@ def get_stats():
             'success': False,
             'message': f'Error fetching statistics: {str(e)}'
         }), 500
+    
+@nailstudio_bp.route('nails/images/<filename>')
+def serve_image(filename):
+    return send_from_directory(IMAGES_FOLDER, filename)
