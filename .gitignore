@@ -52,10 +52,6 @@ logs/*.log
 Thumbs.db
 
 # Jake Images (optional - if you want to track images, remove this)
-jake_images/*.jpg
-jake_images/*.png
-jake_images/*.jpeg
-jake_images/*.gif
 
 # Backup files
 backups/
