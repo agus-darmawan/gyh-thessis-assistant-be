@@ -1,6 +1,6 @@
 # requirements.txt - Python Dependencies
 Flask==2.3.3
-Flask-CORS==4.0.0
+Flask-CORS==6.0.0
 Flask-SQLAlchemy==3.0.5
 Flask-Migrate==4.0.5
 psycopg2-binary==2.9.7
